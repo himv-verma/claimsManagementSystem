@@ -1,11 +1,12 @@
 package com.microservices.demo.jwt.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.microservices.demo.jwt.entity.CustomUserDetails;
+import com.microservices.demo.jwt.entity.User;
 import com.microservices.demo.jwt.service.UserDetailsServiceImpl;
+import com.microservices.demo.jwt.service.UserService;
 import com.microservices.demo.jwt.util.JwtUtil;
 
 @RestController
@@ -28,6 +31,9 @@ public class AuthenticationController {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+    
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/login")
     public String authenticateUser(@RequestBody LoginRequest loginRequest) {
@@ -37,12 +43,43 @@ public class AuthenticationController {
         CustomUserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
         return jwtUtil.generateToken(userDetails.getUsername());
     }
+    @PostMapping("/register")
+    public String registerUser(@RequestBody User user) {
+        userService.registerUser(user);
+        return "User registered successfully";
+    }
 
+    @GetMapping("/validateToken")
+    public ResponseEntity<?> validateToken(@RequestParam String token) {
+        if (jwtUtil.validateToken(token, jwtUtil.extractUsername(token))) {
+            String username = jwtUtil.extractUsername(token);
+            return ResponseEntity.ok().body(new UserDetailResponse(username));
+        } else {
+            return ResponseEntity.status(401).body("Invalid token");
+        }
+    }
+
+    public static class UserDetailResponse {
+        private String username;
+
+        public UserDetailResponse(String username) {
+            this.username = username;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+    }
+    
+    
     public static class LoginRequest {
         private String username;
         private String password;
 
-        // Getters and setters
         public String getUsername() {
             return username;
         }
