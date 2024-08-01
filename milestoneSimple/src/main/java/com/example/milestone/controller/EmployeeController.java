@@ -16,7 +16,7 @@ import com.example.milestone.entity.Employee;
 import com.example.milestone.service.EmployeeService;
 
 @RestController
-@RequestMapping("/api/employees")
+@RequestMapping("/user/employees")
 public class EmployeeController {
 
     @Autowired
