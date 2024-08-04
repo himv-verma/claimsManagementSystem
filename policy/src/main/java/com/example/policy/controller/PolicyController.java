@@ -11,7 +11,7 @@ import com.example.policy.entity.ProviderPolicy;
 import com.example.policy.service.PolicyService;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/policy")
 public class PolicyController {
 
     @Autowired
